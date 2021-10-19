@@ -1,0 +1,115 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src * data:; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+    
+    <title>Gestures</title>
+    
+    <style type="text/css">
+		*{
+			padding: 0px;
+			margin: 0px;
+			touch-action: none;
+			font-size: 12px;
+			font-family: arial;
+			user-select: none;
+		}
+		
+		.testholder{
+			position: relative;
+			margin-top: 20px;
+			margin-left: 5%;
+			width: 90%;
+			height: 350px;
+			overflow: hidden;
+			border: 3px solid red;
+			border-radius: 5px;
+		}
+		
+		#testsubject{
+			cursor: pointer;
+			position: absolute;
+			width: 80px;
+			height: 40px;
+			border: 2px solid blue;
+			text-align: center;
+			line-height: 18px;
+			
+		}
+    </style>
+    
+    <script src="Gestures.js"></script>
+    <script>
+		var output, divX = 20, divY = 20, lastPageX, lastPageY, moving = false;
+		
+		function startHolding(e){
+			lastPageX = e.x;
+			lastPageY = e.y;
+			moving = true;
+			e.elm.style.opacity = 0.5;
+		}
+		
+		function stopHolding(e){
+			moving = false;
+			e.elm.style.opacity = 1;
+		}
+		
+		function handleMove(e){
+			if(!moving){
+				return;
+			}
+			divX += e.x - lastPageX;
+			divY += e.y - lastPageY;
+			e.elm.style.left = divX + "px";
+			e.elm.style.top = divY + "px";
+			lastPageX = e.x;
+			lastPageY = e.y;
+		}
+		
+		function onevent(e){
+			let newDiv = document.createElement("div");
+			let text = JSON.stringify(e);
+			let i, list = Object.getOwnPropertyNames(Gestures.Types);
+			for(i=0; i<list.length; i++){
+				if(Gestures.Types[list[i]] == e.type){
+					text = list[i] + text;
+					break;
+				}
+			}
+			newDiv.innerText = text;
+			output.insertBefore(newDiv, output.firstChild);
+			
+			if(e.type == Gestures.Types.Holding){
+				startHolding(e);
+			}
+			else if(e.type == Gestures.Types.Up){
+				stopHolding(e);
+			}
+			else if(e.type == Gestures.Types.Move){
+				handleMove(e);
+			}
+		}
+		
+		function onload(){
+			let subject = document.getElementById("testsubject");
+			subject.style.left = divX + "px";
+			subject.style.top = divY + "px";
+			Gestures.addListener(subject, onevent);
+			
+			output = document.getElementById("output");
+		}
+		window.addEventListener("load", onload, false);
+    </script>
+</head>
+<body>
+	<h1>Gestures</h1>
+	<div>Tap, swipe and hold the test subject. Hold first to move.</div>
+	<div class="testholder">
+		<div id="testsubject">Test<br/>Subject</div>
+	</div>
+	<h3>Output</h3>
+	<div id="output"></div>
+</body>
+</html>
