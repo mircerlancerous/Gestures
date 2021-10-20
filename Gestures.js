@@ -32,7 +32,7 @@ var Gestures = new function(){
 	function TypeInvalid(type){
 		try{
 			let num = parseInt(type);
-			if(num < 0 || num > 10){
+			if(isNaN(num) || num < 0 || num > 10){
 				return true;
 			}
 		}
