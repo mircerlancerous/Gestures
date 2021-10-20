@@ -93,7 +93,7 @@ var Gestures = new function(){
 	function doCallback(elm, obj){
 		let i, data = findElementData(elm);
 		for(i=0; i<data.types.length; i++){
-			if(data.types[i].type == Types.All || data.types[i].type == obj.typ){
+			if(data.types[i].type == Types.All || data.types[i].type == obj.type){
 				obj.elm = elm;
 				data.types[i].callback(obj);
 				break;
@@ -167,7 +167,7 @@ var Gestures = new function(){
 					if(typeof(type) === 'undefined'){
 						//completely remove the listeners for the element
 						removeElementListeners(elm);
-						elmList.slice(i,1);
+						elmList.splice(i,1);
 					}
 					else{
 						//remove just the callback for the type
