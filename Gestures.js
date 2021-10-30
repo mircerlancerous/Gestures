@@ -52,6 +52,9 @@ var Gestures = new function(){
 	}
 	
 	function removeElementListeners(elm){
+		if(!elm){
+			return;
+		}
 		elm.removeEventListener("contextmenu", contextMenu, false);
 		elm.removeEventListener("pointerup", pointerUp, false);
 		elm.removeEventListener("pointerleave", pointerUp, false);
@@ -83,6 +86,13 @@ var Gestures = new function(){
 	
 	function findElementData(elm){
 		for(let i=0; i<elmList.length; i++){
+			//if this element no longer exists, auto clean-up
+			if(!elmList[i].elm){
+				elmList.splice(i,1);
+				i--;
+				continue;
+			}
+			//this is the element we're looking for
 			if(elm == elmList[i].elm){
 				return elmList[i];
 			}
@@ -163,7 +173,8 @@ var Gestures = new function(){
 		
 		removeListener: function(elm, type){
 			for(let i=0; i<elmList.length; i++){
-				if(elm == elmList[i].elm){
+				//if no element is passed, delete all
+				if(!elm || elm == elmList[i].elm){
 					if(typeof(type) === 'undefined'){
 						//completely remove the listeners for the element
 						removeElementListeners(elm);
@@ -208,18 +219,9 @@ var Gestures = new function(){
 			leave = true;
 		}
 		
-		//check if this was a tap or hold
-		if(!leave && LastMove.count <= Config.MaxTapMoves){
-			if(Date.now() - Down.time > Config.MinLongTouchTime){
-				obj.type = Types.LongClick;
-			}
-			else{
-				obj.type = Types.Tap;
-			}
-			doCallback(this, obj);
-		}
-		//check if this was a swipe - must be faster than hold
-		else if(Date.now() - Down.time < Config.MinLongTouchTime){
+		let wasSwipe = false;
+		//check first if this was a swipe - must be faster than hold
+		if(Date.now() - Down.time < Config.MinLongTouchTime){
 			let changeX = obj.x - Down.x;
 			let changeY = obj.y - Down.y;
 			let negativeX = false, negativeY = false;
@@ -242,6 +244,7 @@ var Gestures = new function(){
 						obj.type = Types.SwipeRight;
 					}
 					doCallback(this, obj);
+					wasSwipe = true;
 				}
 			}
 			else{
@@ -255,8 +258,20 @@ var Gestures = new function(){
 						obj.type = Types.SwipeDown;
 					}
 					doCallback(this, obj);
+					wasSwipe = true;
 				}
 			}
+		}
+		
+		//check if this was a tap or hold
+		if(!wasSwipe && !leave && LastMove.count <= Config.MaxTapMoves){
+			if(Date.now() - Down.time > Config.MinLongTouchTime){
+				obj.type = Types.LongClick;
+			}
+			else{
+				obj.type = Types.Tap;
+			}
+			doCallback(this, obj);
 		}
 		
 		reset();
