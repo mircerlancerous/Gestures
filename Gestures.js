@@ -177,12 +177,12 @@ var Gestures = new function(){
 				if(!elm || elm == elmList[i].elm){
 					if(typeof(type) === 'undefined'){
 						//completely remove the listeners for the element
-						removeElementListeners(elm);
+						removeElementListeners(elmList[i].elm);
 						elmList.splice(i,1);
 					}
 					else{
 						//remove just the callback for the type
-						
+						// -- todo --
 					}
 				}
 			}
@@ -203,6 +203,11 @@ var Gestures = new function(){
 	function pointerUp(e){
 		stopDefaults(e);
 		if(Down.time == null){
+			return;
+		}
+		if(e.pageX == 0 && e.pageY == 0){
+			//handle pointer cancel
+			reset();
 			return;
 		}
 		
